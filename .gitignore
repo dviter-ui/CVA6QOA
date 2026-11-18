@@ -1,0 +1,51 @@
+# ===== Vivado : dossiers générés =====
+*.cache/
+*.hw/
+*.runs/
+*.sim/
+*.ip_user_files/
+*.gen/
+*.Xil/
+.Xil/
+*.tmp/
+
+# ===== Vivado : logs, journaux, rapports =====
+*.log
+*.jou
+*.str
+*.backup.*
+vivado*.zip
+webtalk*
+usage_statistics_webtalk.*
+hs_err_pid*
+
+# ===== Sorties de synthèse / implémentation =====
+*.dcp
+*.bit
+*.bin
+*.ltx
+*.mmi
+*.rpt
+*.pb
+
+# ===== Simulation =====
+xsim.dir/
+*.wdb
+*.vcd
+*.wcfg.bak
+xvlog.pb
+xelab.pb
+
+# ===== IP : garder les .xci, ignorer les fichiers générés =====
+**/ip/*/*
+!**/ip/*/*.xci
+!**/ip/*/*.xcix
+
+# ===== OS / éditeurs =====
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/
+.idea/
