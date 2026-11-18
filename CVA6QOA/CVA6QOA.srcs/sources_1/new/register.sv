@@ -20,21 +20,20 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module register#(int bus_size = 3)(
-    input logic rst_i,
-    input logic clk_i,
-    input logic write_i,
-    input logic [bus_size:0] data_i,
-    output logic [bus_size:0] data_o);
+module register #(int WIDTH = 4)(
+    input  logic             rst_i,    // reset asynchrone, actif bas
+    input  logic             clk_i,
+    input  logic             write_i,
+    input  logic [WIDTH-1:0] data_i,
+    output logic [WIDTH-1:0] data_o);
 
-logic [bus_size:0] data_s;
+logic [WIDTH-1:0] data_s;
 
-always_ff @(posedge clk_i, negedge rst_i )begin
-if (rst_i == 1) data_s <= 1'b0000;
-else begin
-if (write_i) data_s <= data_i;
-else data_o <= data_s;
+always_ff @(posedge clk_i, negedge rst_i) begin
+  if (!rst_i)       data_s <= '0;
+  else if (write_i) data_s <= data_i;
 end
-end
+
+assign data_o = data_s;
 
 endmodule

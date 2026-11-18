@@ -19,14 +19,18 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-import qoa_pkg::*;
-module qoa_div(
-input s16_t val_i,
+module qoa_div import qoa_pkg::*;
+(
+input s32_t val_i,
 input [3:0] scalefactor_i,
-output s16_t val_o
+output s32_t val_o
     );
-    s16_t val_s;
-    assign val_s = 
-    (val_i * qoa_reciprocal_tab[scalefactor_i] + (1 <<< 15)) >>> 16;
-    assign val_o = val_s + ((val_i > 0) - (val_i < 0)) - ((val_s > 0 ) - (val_s < 0));
+    s64_t prod_s;
+    s32_t val_s;
+    // produit sur 64 bits pour éviter tout débordement avant le décalage
+    assign prod_s = s64_t'(val_i) * s64_t'(qoa_reciprocal_tab[scalefactor_i]);
+    assign val_s  = s32_t'((prod_s + (s64_t'(1) <<< 15)) >>> 16);
+    // arrondi en s'éloignant de 0 : n + sign(v) - sign(n)
+    assign val_o = val_s + (s32_t'(val_i > 0) - s32_t'(val_i < 0))
+                         - (s32_t'(val_s > 0) - s32_t'(val_s < 0));
 endmodule

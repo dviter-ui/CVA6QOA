@@ -18,10 +18,3 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-import wav_pkg::*;
-import qoa_pkg::*;
-
-module qoa_wav_decoder(
-input frame frame_i, 
-    );
-endmodule

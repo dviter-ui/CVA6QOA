@@ -35,7 +35,7 @@ package qoa_pkg;
       1, 7, 21, 45, 84, 138, 211, 304, 421, 562, 731, 928, 1157, 1419, 1715, 2048
   };
   
-  localparam shortint qoa_reciprocal_tab[0:15] = '{
+  localparam int qoa_reciprocal_tab[0:15] = '{
       65536, 9363, 3121, 1457, 781, 475, 311, 216, 156, 117, 90, 71, 57, 47, 39, 32
   };
   

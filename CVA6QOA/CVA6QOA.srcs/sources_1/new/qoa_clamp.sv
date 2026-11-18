@@ -20,7 +20,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module qoa_clamp(
+module qoa_clamp import qoa_pkg::*;
+(
 input s32_t val_i,
 input s32_t min_i,
 input s32_t max_i,

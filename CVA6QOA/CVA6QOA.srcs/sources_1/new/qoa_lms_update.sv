@@ -19,8 +19,8 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-import qoa_pkg::*;
-module qoa_lms_update(
+module qoa_lms_update import qoa_pkg::*;
+(
 input int sample_i,
 input int residual_i,
 input lms_state_t lms_i,
