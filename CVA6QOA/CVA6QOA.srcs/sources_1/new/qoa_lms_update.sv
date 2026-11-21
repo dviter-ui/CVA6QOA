@@ -27,21 +27,10 @@ input lms_state_t lms_i,
 output lms_state_t lms_o
     );
     s32_t delta_s;
-    lms_state_t lms_s;
     assign delta_s = residual_i >>>4;
-    
-    always_comb begin
-    for (int i = 0; i<4; i++) 
-    lms_s.weights[i] = lms_i.weights[i] + ((lms_i.history[i]<0) ? -delta_s : delta_s);
-    
-    for (int i = 0 ; i<3; i++)
-    lms_s.history[i] = lms_i.history[i+1];
-    lms_s.history[3] = sample_i;
+    //Ne pas utiliser une boucle for dans un always_comb, Icarusverilog plante sinon
+    for (genvar i = 0; i<4; i++) begin : g_weights
+    assign lms_o.weights[i] = lms_i.weights[i] + ((lms_i.history[i]<0) ? -delta_s : delta_s);
     end
-    
-    assign lms_o = lms_s;
-    
-    
-
-    
+    assign lms_o.history = {lms_i.history[1], lms_i.history[2], lms_i.history[3], s16_t'(sample_i)};
 endmodule

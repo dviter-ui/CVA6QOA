@@ -126,8 +126,8 @@ qoa_lms_predict u_predict (.lms_i(lms),.prediction_o(predicted));
 assign residual = sample - predicted;
 qoa_div u_qoadiv (.scalefactor_i(scalefactor),.val_i(residual),.val_o(scaled));
 qoa_clamp u_qoaclamp (.val_i(scaled),.val_o(clamped),.min_i(-8),.max_i(8));
-assign quantized = qoa_quant_tab[clamped + 8];
-assign dequantized = qoa_dequant_tab[scalefactor][quantized];
+assign quantized = qoa_quant(clamped + 8);
+assign dequantized = qoa_dequant(scalefactor, quantized);
 qoa_clamp u_qoaclamp16 (.val_i(dequantized+predicted),.val_o(reconstructed),.min_i(-32768),.max_i(32767));
 assign weights_penalty_tmp = ((lms.weights[0] * lms.weights[0] + lms.weights[1] 
 * lms.weights[1] + lms.weights[2] 

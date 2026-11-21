@@ -26,37 +26,88 @@ package qoa_pkg;
   localparam int SLICE_LEN        = 20;
   localparam int SLICES_PER_FRAME = 256;
   localparam int LMS_LEN          = 4;
-  localparam logic [2:0] qoa_quant_tab [0:16] = 
-  '{7, 7, 7, 5, 5, 3, 3, 1, /* -8..-1 */
-      0,                      /*  0     */
-      0, 2, 2, 4, 4, 6, 6, 6  /*  1.. 8 */};
-  localparam logic [11:0] qoa_scalefactor_tab [0:15] = 
-  '{
-      1, 7, 21, 45, 84, 138, 211, 304, 421, 562, 731, 928, 1157, 1419, 1715, 2048
-  };
-  
-  localparam int qoa_reciprocal_tab[0:15] = '{
-      65536, 9363, 3121, 1457, 781, 475, 311, 216, 156, 117, 90, 71, 57, 47, 39, 32
-  };
-  
-  localparam shortint signed qoa_dequant_tab[0:15][0:7] = '{
-      '{   1,    -1,    3,    -3,    5,    -5,     7,     -7},
-      '{   5,    -5,   18,   -18,   32,   -32,    49,    -49},
-      '{  16,   -16,   53,   -53,   95,   -95,   147,   -147},
-      '{  34,   -34,  113,  -113,  203,  -203,   315,   -315},
-      '{  63,   -63,  210,  -210,  378,  -378,   588,   -588},
-      '{ 104,  -104,  345,  -345,  621,  -621,   966,   -966},
-      '{ 158,  -158,  528,  -528,  950,  -950,  1477,  -1477},
-      '{ 228,  -228,  760,  -760, 1368, -1368,  2128,  -2128},
-      '{ 316,  -316, 1053, -1053, 1895, -1895,  2947,  -2947},
-      '{ 422,  -422, 1405, -1405, 2529, -2529,  3934,  -3934},
-      '{ 548,  -548, 1828, -1828, 3290, -3290,  5117,  -5117},
-      '{ 696,  -696, 2320, -2320, 4176, -4176,  6496,  -6496},
-      '{ 868,  -868, 2893, -2893, 5207, -5207,  8099,  -8099},
-      '{1064, -1064, 3548, -3548, 6386, -6386,  9933,  -9933},
-      '{1286, -1286, 4288, -4288, 7718, -7718, 12005, -12005},
-      '{1536, -1536, 5120, -5120, 9216, -9216, 14336, -14336}
-  };
+
+  //Icarusverilog ne supporte pas les unpacked array, on les remplacent donc par une fonction.
+
+  function automatic logic [2:0] qoa_quant(input int idx);
+    case (idx)
+      0, 1, 2 : return 3'd7;
+      3, 4    : return 3'd5;
+      5, 6    : return 3'd3;
+      7       : return 3'd1;
+      8, 9    : return 3'd0;
+      10, 11  : return 3'd2;
+      12, 13  : return 3'd4;
+      default : return 3'd6;   // 14..16
+    endcase
+  endfunction
+
+  function automatic logic [11:0] qoa_scalefactor(input logic [3:0] sf);
+    case (sf)
+      4'd0  : return 12'd1;
+      4'd1  : return 12'd7;
+      4'd2  : return 12'd21;
+      4'd3  : return 12'd45;
+      4'd4  : return 12'd84;
+      4'd5  : return 12'd138;
+      4'd6  : return 12'd211;
+      4'd7  : return 12'd304;
+      4'd8  : return 12'd421;
+      4'd9  : return 12'd562;
+      4'd10 : return 12'd731;
+      4'd11 : return 12'd928;
+      4'd12 : return 12'd1157;
+      4'd13 : return 12'd1419;
+      4'd14 : return 12'd1715;
+      4'd15 : return 12'd2048;
+    endcase
+  endfunction
+
+  function automatic int qoa_reciprocal(input logic [3:0] sf);
+    case (sf)
+      4'd0  : return 65536;
+      4'd1  : return 9363;
+      4'd2  : return 3121;
+      4'd3  : return 1457;
+      4'd4  : return 781;
+      4'd5  : return 475;
+      4'd6  : return 311;
+      4'd7  : return 216;
+      4'd8  : return 156;
+      4'd9  : return 117;
+      4'd10 : return 90;
+      4'd11 : return 71;
+      4'd12 : return 57;
+      4'd13 : return 47;
+      4'd14 : return 39;
+      4'd15 : return 32;
+    endcase
+  endfunction
+
+  // Chaque ligne de la table est faite de paires (+v, -v) : on stocke la
+  // magnitude indexée par q[2:1] et on applique le signe avec q[0]
+  function automatic shortint qoa_dequant(input logic [3:0] sf, input logic [2:0] q);
+    shortint mag;
+    case (sf)
+      4'd0  : case (q[2:1]) 2'd0: mag =    1; 2'd1: mag =    3; 2'd2: mag =    5; default: mag =     7; endcase
+      4'd1  : case (q[2:1]) 2'd0: mag =    5; 2'd1: mag =   18; 2'd2: mag =   32; default: mag =    49; endcase
+      4'd2  : case (q[2:1]) 2'd0: mag =   16; 2'd1: mag =   53; 2'd2: mag =   95; default: mag =   147; endcase
+      4'd3  : case (q[2:1]) 2'd0: mag =   34; 2'd1: mag =  113; 2'd2: mag =  203; default: mag =   315; endcase
+      4'd4  : case (q[2:1]) 2'd0: mag =   63; 2'd1: mag =  210; 2'd2: mag =  378; default: mag =   588; endcase
+      4'd5  : case (q[2:1]) 2'd0: mag =  104; 2'd1: mag =  345; 2'd2: mag =  621; default: mag =   966; endcase
+      4'd6  : case (q[2:1]) 2'd0: mag =  158; 2'd1: mag =  528; 2'd2: mag =  950; default: mag =  1477; endcase
+      4'd7  : case (q[2:1]) 2'd0: mag =  228; 2'd1: mag =  760; 2'd2: mag = 1368; default: mag =  2128; endcase
+      4'd8  : case (q[2:1]) 2'd0: mag =  316; 2'd1: mag = 1053; 2'd2: mag = 1895; default: mag =  2947; endcase
+      4'd9  : case (q[2:1]) 2'd0: mag =  422; 2'd1: mag = 1405; 2'd2: mag = 2529; default: mag =  3934; endcase
+      4'd10 : case (q[2:1]) 2'd0: mag =  548; 2'd1: mag = 1828; 2'd2: mag = 3290; default: mag =  5117; endcase
+      4'd11 : case (q[2:1]) 2'd0: mag =  696; 2'd1: mag = 2320; 2'd2: mag = 4176; default: mag =  6496; endcase
+      4'd12 : case (q[2:1]) 2'd0: mag =  868; 2'd1: mag = 2893; 2'd2: mag = 5207; default: mag =  8099; endcase
+      4'd13 : case (q[2:1]) 2'd0: mag = 1064; 2'd1: mag = 3548; 2'd2: mag = 6386; default: mag =  9933; endcase
+      4'd14 : case (q[2:1]) 2'd0: mag = 1286; 2'd1: mag = 4288; 2'd2: mag = 7718; default: mag = 12005; endcase
+      4'd15 : case (q[2:1]) 2'd0: mag = 1536; 2'd1: mag = 5120; 2'd2: mag = 9216; default: mag = 14336; endcase
+    endcase
+    return q[0] ? -mag : mag;
+  endfunction
   
 
   typedef logic signed [15:0] s16_t;   // élément signé : history[i] reste signé

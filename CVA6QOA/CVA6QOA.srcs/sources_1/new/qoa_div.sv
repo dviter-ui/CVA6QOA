@@ -28,7 +28,7 @@ output s32_t val_o
     s64_t prod_s;
     s32_t val_s;
     // produit sur 64 bits pour éviter tout débordement avant le décalage
-    assign prod_s = s64_t'(val_i) * s64_t'(qoa_reciprocal_tab[scalefactor_i]);
+    assign prod_s = s64_t'(val_i) * s64_t'(qoa_reciprocal(scalefactor_i));
     assign val_s  = s32_t'((prod_s + (s64_t'(1) <<< 15)) >>> 16);
     // arrondi en s'éloignant de 0 : n + sign(v) - sign(n)
     assign val_o = val_s + (s32_t'(val_i > 0) - s32_t'(val_i < 0))
